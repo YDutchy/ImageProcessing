@@ -3,6 +3,7 @@ function results = parsePlates(plates)
 
 % Label each separate character
 labeled = bwlabel(uint32(plates), 4);
+
 % Create an empty license
 license = [];
 % For each character try to recognise it
@@ -10,7 +11,7 @@ for m = 1:max(max(labeled))
     [character, certainty] = recogniseCharacter(labeled == m);
 
     % A dash is no good fit for any character
-    if 0.2 < certainty && certainty  < 0.5
+    if certainty && certainty  < 0.3
         character = '-';
     end
 

@@ -68,6 +68,7 @@ handles.frameSkip = 16;
 handles.videoWidth = 0;
 handles.videoHeight = 0;
 handles.scene_number.String = num2str(handles.currentScene);
+handles.charArray = loadCharData;
 guidata(hObject, handles);
 
 
@@ -97,7 +98,7 @@ function button_import_Callback(hObject, eventdata, handles)
    % handles.videoName = n;
    % handles.videoPath = filePath;
    % videoReader = VideoReader(strcat(filePath, n));
-    videoReader = VideoReader('./video.avi');
+    videoReader = VideoReader('./Trainingsvideo.avi');
     handles.videoHeight = videoReader.Height;
     handles.videoWidth = videoReader.Width;
 

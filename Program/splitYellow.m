@@ -10,7 +10,7 @@ function [ binaryImage ] = splitYellow( hsvData )
     binaryImage = ( hsvData(:, :, 1) > hue_threshold_lower_orange & hsvData(:, :, 1) < hue_threshold_upper_orange);
     binaryImage = binaryImage & hsvData(:, :, 3) >= val_threshold & hsvData(:, :, 3)>= sat_threshold;
     binaryImage = dip_image(binaryImage);
-    binaryImage = closing(binaryImage, 15, 'rectangular');
+    binaryImage = closing(binaryImage, 20, 'rectangular');
     binaryImage = double(binaryImage);
 end   
 

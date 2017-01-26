@@ -1,6 +1,8 @@
-function [ data ] = extractCharacterIslands(bboxses, grayData, h, w)
+function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mode)
+    % mode: yellow or white (1 / 0)
     charsize_max = h * w * (1/14);
-    charsize_min = h * w * (1/1400);
+    charsize_min = 16;
+    threshold_iterations = 2;
   
     data = repmat(struct('island', '0'), length(bboxses), 1);
      
@@ -10,6 +12,7 @@ function [ data ] = extractCharacterIslands(bboxses, grayData, h, w)
         
         % Use a brighter threshold in predominantly dark images
         mean_image = mean2(image);
+        figure, imshow(image)
         % Dark image if result is negative
         if (mean_image - 128 < 0)
             mean_image = mean_image * 1.2;
@@ -19,35 +22,36 @@ function [ data ] = extractCharacterIslands(bboxses, grayData, h, w)
         if (mean_image - 128 >= 0)
             mean_image = mean_image * 0.9;
         end
+        build_up_image = zeros(size(image));
         
-        for threshold_iterations = -1:1
-            mean_image = mean_image + (threshold_iterations*15);
-            image = image < mean_image;
+        for th_it = -threshold_iterations:threshold_iterations
+            mean_image_it = mean_image + (th_it*30);
+            image = image < mean_image_it;
             image = imclearborder(image, 4);
             
-            figure, imshow(image), title(['charIsland ' num2str(i) '  - ' num2str(threshold_iterations) ' <-th ' num2str(mean_image)])
+            
+            %figure, imshow(image), title(['charIsland ' num2str(i) '  - ' num2str(threshold_iterations) ' <-th ' num2str(mean_image)])
             CC = bwconncomp(image);
             [~, binaryImage] = stripSmallIslandsCC(CC, image, charsize_min, charsize_max);
             CC = bwconncomp(binaryImage);
             candidate = splitChars(CC, binaryImage);
                        
             if(isstruct(candidate))
+                build_up_image = ceil((build_up_image + binaryImage) / (1 + 2*threshold_iterations));
                 if(length(data(i).island) < length(candidate))
-                    figure, imshow(binaryImage);
                     data(i).island = candidate;
                 end
             end
         end
+        figure, imshow(build_up_image), title('BU image')
     end
     
     for i = 1:length(data)
-        data(i).island
         if(isstruct(data(i).island))
-            figure, imshow(getBoundingBoxImage(bboxses(i), grayData, h, w)), title('valid')
+            %figure, imshow(getBoundingBoxImage(bboxses(i), grayData, h, w)), title('valid')
         else
             %figure, imshow(getBoundingBoxImage(bboxses(i), grayData, h, w)), title('not valid')
         end
-        disp(['mean: ' num2str(mean2(grayData))])
     end
     
 end
@@ -91,7 +95,7 @@ function [ chars ] = splitChars(CC, fragment)
         end
         charImage = getBoundingBoxImage(bboxes(i), fragment, h, w);
         chars(i).char = charImage;
-        %figure, imshow(charImage), title(num2str(bbox_array(4) / bbox_array(3)))
+        figure, imshow(charImage), title(num2str(bbox_array(4) / bbox_array(3)))
     end    
 end
 

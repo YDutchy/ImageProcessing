@@ -2,22 +2,27 @@ function [ output_args ] = getVotingSchema( hsvData, grayData, handles )
 % IN: image
 % OUT: struct/array with license-plate regions and their respective scores
 
-    [yellow_bboxses, yellow_centroids] = getYellowPlateRegions( hsvData, handles );
-    [white_bboxses, white_centroids] = getWhitePlateRegions( grayData, handles );
+    [yellow_bboxses, yellow_centroids, binaryImageYellow] = getYellowPlateRegions( hsvData, handles );
+    [white_bboxses, white_centroids, binaryImageWhite] = getWhitePlateRegions( grayData, handles );
     %all_bboxses = cat(1, yellow_bboxses, white_bboxses);
     
     hor_vert_edges_yellow = computeHor_VertEdgesFor(yellow_bboxses, grayData, handles.videoHeight, handles.videoWidth);
     hor_vert_edges_white = computeHor_VertEdgesFor(white_bboxses, grayData, handles.videoHeight, handles.videoWidth);
     
+    
+    
     yellow_vert_edgeJudgement = filterBoundingBoxesByVerticalEdges(hor_vert_edges_yellow);  
     white_vert_edgeJudgement = filterBoundingBoxesByVerticalEdges(hor_vert_edges_white);
     
-    % Yellow areas gain precedence over white areas
+    
+    
+    yellow_charsplitJudgement = extractCharacterIslands(yellow_bboxses, hsvData, grayData, handles.videoHeight, handles.videoWidth, 'yellow');
+    
+    yellow_bboxses
     yellow_vert_edgeJudgement
+    white_bboxses
     white_vert_edgeJudgement
-    
-    yellow_charsplitJudgement = extractCharacterIslands(yellow_bboxses, grayData, handles.videoHeight, handles.videoWidth);
-    
+    return
     for i = 1:length(yellow_vert_edgeJudgement)
         bbox = yellow_bboxses(i);
         [ lx, ux, ly, uy ] = getUpperLowerBbox( bbox, handles.videoHeight, handles.videoWidth );
@@ -75,7 +80,7 @@ function [ bboxes_out ] = computeHor_VertEdgesFor(bboxes, grayData, h, w)
     end
 end
 
-function [ bboxes, centroids ] = getYellowPlateRegions( hsvData, handles )
+function [ bboxes, centroids, binaryImage ] = getYellowPlateRegions( hsvData, handles )
     min_size = 2000;
     max_size = handles.videoHeight * handles.videoWidth * (1/5);
     % -- move into handles later
@@ -88,7 +93,7 @@ function [ bboxes, centroids ] = getYellowPlateRegions( hsvData, handles )
     bboxes = regionprops(CC, 'BoundingBox');
 end
 
-function [ bboxes, centroids ] = getWhitePlateRegions( grayData, handles )
+function [ bboxes, centroids, binaryImage ] = getWhitePlateRegions( grayData, handles )
     min_size = 2000;
     max_size = handles.videoHeight * handles.videoWidth * (1/5);
     % -- move into handles later

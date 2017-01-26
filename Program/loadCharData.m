@@ -14,4 +14,3 @@ charArray = arrayfun(read, chars,...
     'UniformOutput', false);
 
 end
-

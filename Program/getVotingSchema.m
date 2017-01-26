@@ -15,24 +15,36 @@ function [ output_args ] = getVotingSchema( hsvData, grayData, handles )
     white_vert_edgeJudgement = filterBoundingBoxesByVerticalEdges(hor_vert_edges_white);
     
     
+    tic
+    yellow_charsplits = extractCharacterIslands(yellow_bboxses, hsvData, grayData, handles.videoHeight, handles.videoWidth, 'yellow');
+    yellow_charsplit_judgement = charSplitJudgement(yellow_charsplits);
+    white_charsplits = extractCharacterIslands(white_bboxses, hsvData, grayData, handles.videoHeight, handles.videoWidth, 'white');
+    white_charsplit_judgement = charSplitJudgement(white_charsplits);
+    toc
     
-    yellow_charsplitJudgement = extractCharacterIslands(yellow_bboxses, hsvData, grayData, handles.videoHeight, handles.videoWidth, 'yellow');
-    
-    yellow_bboxses
+    %yellow_bboxses
     yellow_vert_edgeJudgement
-    white_bboxses
+    yellow_charsplit_judgement
+    %white_bboxses
     white_vert_edgeJudgement
-    return
-    for i = 1:length(yellow_vert_edgeJudgement)
+    white_charsplit_judgement
+
+    for i = 1:length(yellow_charsplit_judgement)
+        if(yellow_charsplit_judgement(i) == 0)
+            continue
+        end
         bbox = yellow_bboxses(i);
         [ lx, ux, ly, uy ] = getUpperLowerBbox( bbox, handles.videoHeight, handles.videoWidth );
-        %figure, imshow(grayData(ly:uy, lx:ux)), title('edge yellow')
+        figure, imshow(grayData(ly:uy, lx:ux)), title('yellow region')
     end
     
-    for i = 1:length(white_vert_edgeJudgement)
+    for i = 1:length(white_charsplit_judgement)
+        if(white_charsplit_judgement(i) == 0)
+            continue
+        end
         bbox = white_bboxses(i);
         [ lx, ux, ly, uy ] = getUpperLowerBbox( bbox, handles.videoHeight, handles.videoWidth );
-        %figure, imshow(grayData(ly:uy, lx:ux)), title('edge white')
+        figure, imshow(grayData(ly:uy, lx:ux)), title('edge white')
     end
     
     updateAxes(grayData, handles, 2);
@@ -43,7 +55,7 @@ function [ output_args ] = getVotingSchema( hsvData, grayData, handles )
 end
 
 function [ bboxes_out ] = filterBoundingBoxesByVerticalEdges(hor_vert_edges ) 
-    mean_vert_edge_threshold = 0.12;
+    mean_vert_edge_threshold = 0.09;
     strong_edge_threshold = 0.98;
     
     bboxes_out = zeros(1, length(hor_vert_edges));

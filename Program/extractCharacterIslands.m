@@ -1,18 +1,25 @@
 function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mode)
     % mode: yellow or white (1 / 0)
+    % Data is a struct-array with the fields:
+    %   island: Indicates an individual connected component
+    %       \-> has candidate struct
+    %           \-> candidate has fields:
+    %               - refused: reason, if refused
+    %               - char: image, if some character was segmented properly
+    
     charsize_max = h * w * (1/14);
-    charsize_min = 16;
-    threshold_iterations = 2;
+    charsize_min = 14;
+    threshold_iterations = 1;
   
     data = repmat(struct('island', '0'), length(bboxses), 1);
-     
+    
     for i = 1:length(bboxses)
         image = getBoundingBoxImage(bboxses(i), grayData, h, w);
         image = histeq(image);
         
         % Use a brighter threshold in predominantly dark images
         mean_image = mean2(image);
-        figure, imshow(image)
+
         % Dark image if result is negative
         if (mean_image - 128 < 0)
             mean_image = mean_image * 1.2;
@@ -35,32 +42,24 @@ function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mo
             [~, binaryImage] = stripSmallIslandsCC(CC, image, charsize_min, charsize_max);
             CC = bwconncomp(binaryImage);
             candidate = splitChars(CC, binaryImage);
-                       
-            if(isstruct(candidate))
-                build_up_image = ceil((build_up_image + binaryImage) / (1 + 2*threshold_iterations));
-                if(length(data(i).island) < length(candidate))
+            
+            build_up_image = ceil((build_up_image + binaryImage) ./ (1 + 2*threshold_iterations));
+            
+            if(~isfield(candidate, 'refused'))
+                if(th_it ~= threshold_iterations && length(data(i).island) < length(candidate))
                     data(i).island = candidate;
                 end
             end
         end
-        figure, imshow(build_up_image), title('BU image')
     end
-    
-    for i = 1:length(data)
-        if(isstruct(data(i).island))
-            %figure, imshow(getBoundingBoxImage(bboxses(i), grayData, h, w)), title('valid')
-        else
-            %figure, imshow(getBoundingBoxImage(bboxses(i), grayData, h, w)), title('not valid')
-        end
-    end
-    
+    %explainCharSplitArray(data);
 end
 
 function [ chars ] = splitChars(CC, fragment)
     bboxes = regionprops(CC, 'BoundingBox');
     r = regionprops(CC, 'Centroid');
     [h, w] = size(fragment);
-    max_h_w_ratio = 2.5;
+    max_h_w_ratio = 4.5;
     min_char_count = 3;
     max_char_count = 14;
     max_height = h;
@@ -69,7 +68,7 @@ function [ chars ] = splitChars(CC, fragment)
     centroids = cat(1, r.Centroid);
     
     if(length(centroids) < 1)
-        chars = 0;
+        chars = struct('refused', 'No centroids found.');
         return
     end
     
@@ -78,8 +77,7 @@ function [ chars ] = splitChars(CC, fragment)
     
     
     if(length(bboxes) <= min_char_count || length(bboxes) > max_char_count)
-        chars = 0;
-        disp('Invalid char count')
+        chars = struct('refused', ['CC count was ' num2str(2) ' while bounds: [' num2str(3) ', ' num2str(15) ']']);
         return
     end
     
@@ -87,16 +85,17 @@ function [ chars ] = splitChars(CC, fragment)
         bbox_array = bboxes(i).BoundingBox; 
         if(var_centroid > max_variance_height_centroid)
             disp('illegal centroid variance')
+            chars(i).char = struct('refused', 'Illegal size or proportions');
             continue;
         end
         if (bbox_array(4) / bbox_array(3) > max_h_w_ratio || bbox_array(4) <= min_height || bbox_array(4) > max_height)
             disp('illegal size')
+            chars(i).char = struct('refused', 'Illegal size or proportions');
             continue;
         end
         charImage = getBoundingBoxImage(bboxes(i), fragment, h, w);
         chars(i).char = charImage;
-        figure, imshow(charImage), title(num2str(bbox_array(4) / bbox_array(3)))
-    end    
+    end   
 end
 
 % yellow_charsplitJudgement = testForCharacterIslands(yellow_bboxses, grayData, handles.videoHeight, handles.videoWidth);

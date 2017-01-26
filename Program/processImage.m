@@ -6,7 +6,6 @@ function [ imageData ] = processImage( imageData, handles )
     grayData = rgb2gray(imageData);
     grayData = medfilt2(grayData);
     
-    
     % Clean noise from value channel -> Equalize values /w histeq
     hsvData = rgb2hsv(imageData);
     hsvData(:, :, 3) = medfilt2(hsvData(:, :, 3));
@@ -20,16 +19,17 @@ function [ imageData ] = processImage( imageData, handles )
             
     bin_split_data_yellow = splitYellow( hsvData );
     bin_split_data_yellow = bin_split_data_yellow & grayData > 72;
-    %[bin_split_data_yellow, edges] = postProcessColourSegmentation( bin_split_data_yellow, grayData );
-
+    getVotingSchema( hsvData, grayData, handles )
+    
+    return
     % - Begin draftt
         [bboxes2, centroids2, charactersplit, gradient_v, binaryImage] = clusterCharactersInImage(grayData, hsvData, handles.videoHeight, handles.videoWidth);
         updateAxes(grayData, handles, 2);
-        updateAxes(charactersplit, handles, 3);
+        updateAxes(bin_split_data_yellow, handles, 3);
         updateAxes(gradient_v, handles, 4);
         title('v - h')
-        updateAxes(gradient_v, handles, 5);
-        title('clusters')
+            axes(handles.axes5);
+        histogram(hsvData(:, :, 1), 100), title('hue distribution')
         updateAxes(binaryImage, handles, 6);
         title('after segmentation')
         plotBoundingBoxes(bboxes2);

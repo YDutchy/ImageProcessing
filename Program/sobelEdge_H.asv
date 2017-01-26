@@ -7,7 +7,7 @@ function [ gradient_h ] = sobelEdge_H( grayImage )
                          1  2  1 ;
                     ];
                 
-    gradient_h = ((conv2(double(grayImage), double(sobelMask_h), 'same'))./80) .^ 2;
+    gradient_h = ((conv2(double(grayImage), double(sobelMask_h), 'same'))./64) .^ 2;
    
     gradient_h = sqrt(gradient_h);  
 end

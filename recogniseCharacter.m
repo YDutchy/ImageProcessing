@@ -13,6 +13,7 @@ chars = ['A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'; 'I'; 'J'; 'K'; 'L';...
 x30 = arrayfun(read, chars,...
     'UniformOutput', false);
 
+tic
 % Convert to double
 in = double(in);
 
@@ -38,5 +39,5 @@ end
 % Set return values
 character = chars(i(36));
 certainty = v(c);
-
+toc
 end

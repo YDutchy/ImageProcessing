@@ -1,0 +1,79 @@
+function extracted =extractLetter(island)
+load CharTemplate
+
+
+if vd==1
+    extracted='A';
+elseif vd==2
+    extracted='B';
+elseif vd==3
+    extracted='C';
+elseif vd==4
+    extracted='D';
+elseif vd==5
+    extracted='E';
+elseif vd==6
+    extracted='F';
+elseif vd==7
+    extracted='G';
+elseif vd==8
+    extracted='H';
+elseif vd==9
+    extracted='I';
+elseif vd==10
+    extracted='J';
+elseif vd==11
+    extracted='K';
+elseif vd==12
+    extracted='L';
+elseif vd==13
+    extracted='M';
+elseif vd==14
+    extracted='N';
+elseif vd==15
+    extracted='O';
+elseif vd==16
+    extracted='P';
+elseif vd==17
+    extracted='Q';
+elseif vd==18
+    extracted='R';
+elseif vd==19
+    extracted='S';
+elseif vd==20
+    extracted='T';
+elseif vd==21
+    extracted='U';
+elseif vd==22
+    extracted='V';
+elseif vd==23
+    extracted='W';
+elseif vd==24
+    extracted='X';
+elseif vd==25
+    extracted='Y';
+elseif vd==26
+    extracted='Z';
+elseif vd==27
+    extracted='1';
+elseif vd==28
+    extracted='2';
+elseif vd==29
+    extracted='3';
+elseif vd==30
+    extracted='4';
+elseif vd==31
+    extracted='5';
+elseif vd==32
+    extracted='6';
+elseif vd==33
+    extracted='7';
+elseif vd==34
+    extracted='8';
+elseif vd==35
+    extracted='9';
+else
+    extracted='0';
+end
+% End function
+end

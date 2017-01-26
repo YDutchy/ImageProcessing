@@ -1,7 +1,0 @@
-function [ bboxes, centroids, split ] = clusterCharactersInImage( grayData, h, w )
-    
-    bboxes = 0, centroids = 0, split = 0
-    split = double(threshold(grayData, 'isodata'));
-    gradient_v = sobelEdge_V()
-end
-

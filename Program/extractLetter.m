@@ -1,13 +1,17 @@
-function extracted =extractLetter(island)
+function extracted = extractLetter(island)
 load CharTemplate
+tic
 letter = [];
 island = imresize(island, [42, 24]);
+island = double(dilation(island, 2));
+
 for i = 1:length(CharTemplate)
     correlation = corr2(CharTemplate{1, i}, island);
-    letter = [letter correlation]
+    letter = [letter, correlation];
 end
 
-index = find(letter==max(letter));
+[sorted, index] = sort(letter);
+index = index(end);
 
 if index==1
     extracted='A';
@@ -82,5 +86,6 @@ elseif index==35
 else
     extracted='0';
 end
+toc
 % End function
 end

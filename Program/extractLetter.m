@@ -11,7 +11,7 @@ for i = 1:length(CharTemplate)
 end
 
 [sorted, index] = sort(letter);
-index = index(end);
+index = index(end-1);
 
 if index==1
     extracted='A';

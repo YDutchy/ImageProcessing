@@ -52,12 +52,11 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     count = 1;
     % Gather all plate-regions with a score higher than the minimum score
     
-    if ~isempty(id_y)
+    if ~isempty(id_w)
         for i = 1:length(id_y)
             currentPlate_index = id_y(i)
             if(yellow_total(currentPlate_index) >= min_score_yellow)
                 data_out(count).BoundingBox = yellow_bboxes(currentPlate_index);
-                yellow_charsplits(currentPlate_index)
                 data_out(count).char = yellow_charsplits(currentPlate_index);
                 count = count + 1;
             end
@@ -81,14 +80,14 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     plotBoundingBoxes(white_bboxes, 'w');
     plotCentroids(white_centroids, 'b');
     
+    updateAxes( , 3)
     if ~isempty(data_out)
         im = getBoundingBoxImage(data_out(1).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
-        updateAxes(im, handles, 3);
+        updateAxes(data_out, handles, 2);
     end
-    if length(data_out) >= 2
-        im = getBoundingBoxImage(data_out(2).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
-        updateAxes(im, handles, 4);
-    end
+    figure, imshow()
+    figure, imshow(getBoundingBoxImage(data_out(2).BoundingBox, grayData, handles.videoHeight, handles.videoWidth))
+     
 end
 
 function [ bboxes_out ] = scoreBoundingBoxesByAspectRatio( boundingBoxes, h, w ) 

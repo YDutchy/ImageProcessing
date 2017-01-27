@@ -2,9 +2,9 @@ function [ binaryImage ] = splitYellow( hsvData )
 % Split a yellowish plate
     hue_threshold_lower_orange = 0.07; % 0.0417
     hue_threshold_upper_orange = 0.15; % 0.1111   
-    val_threshold = 0.33;
+    val_threshold = 0.30;
     mean2(hsvData(:, :, 3))
-    sat_threshold = 0.33;
+    sat_threshold = 0.31;
     %figure, histogram(hsvData(294:318, 484:588, 1), 160)
     % Yellow/Orange plate case: 
     binaryImage = ( hsvData(:, :, 1) > hue_threshold_lower_orange & hsvData(:, :, 1) < hue_threshold_upper_orange);

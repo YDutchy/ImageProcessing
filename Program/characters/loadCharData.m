@@ -3,11 +3,11 @@
 A=imread('A.bmp');A2=imread('fillA.bmp');
 B=imread('B.bmp');B2=imread('fillB.bmp');B3=imread('B2.bmp');
 C=imread('C.bmp');
-D=imread('D.bmp');D2=imread('fillD.bmp');
+D=imread('D.bmp');D2=imread('fillD.bmp');D3=imread('D2.bmp');
 E=imread('E.bmp');
 F=imread('F.bmp');
 G=imread('G.bmp');G2=imread('G2.bmp');
-H=imread('H.bmp');
+H=imread('H.bmp');H2=imread('H2.bmp');
 I=imread('I.bmp');
 J=imread('J.bmp');
 K=imread('K.bmp');
@@ -40,11 +40,11 @@ zero=imread('0.bmp');zero2=imread('fill0.bmp');zero3=imread('0two.bmp');
 
 
 
-letters=[A A2 B B2 B3 C D D2 E F G G2 H I J K L M N N2 O O2 P P2 P3 Q Q2 R R2 S S2 T U V W X Y Z Z2];
+letters=[A A2 B B2 B3 C D D2 D3 E F G G2 H H2 I J K L M N N2 O O2 P P2 P3 Q Q2 R R2 S S2 T U V W X Y Z Z2];
 numbers=[one one2 two three four four2 five five2 five3 six six2 six3 seven eight eight2 eight3 eight4 nine nine2 zero zero2 zero3];
 characters=[letters numbers];
 
-CharTemplate=mat2cell(characters,42,[ 24 ...
+CharTemplate=mat2cell(characters,42,[ 24 24 24 ...
     24 24 24 24 24 24 ...
     24 24 24 24 24 24 ...
     24 24 24 24 24 24 ...

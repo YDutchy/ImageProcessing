@@ -42,6 +42,25 @@ function [ imageData ] = processImage( imageData, handles )
             end
         end
     end
+    valid_characters = [];
+    
+    if ~isempty(data_out)
+        for data_index = 1:length(data_out)
+            collectedChars = '';
+            for i = 1:length(data_out(data_index).char.islandsInBbox)            
+
+                if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
+                    continue
+                end
+                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.charTemplate)
+                collectedChars = [collectedChars, letter];
+            end
+            if (length(collectedChars) >= 6)
+                valid_characters = [valid_characters ; collectedChars];
+            end
+        end
+    end
+    valid_characters
 end
 
 function [] = plotBoundingBoxes(bbox)

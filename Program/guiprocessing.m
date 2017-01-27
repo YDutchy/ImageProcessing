@@ -67,6 +67,7 @@ handles.currentScene = 0;
 handles.frameSkip = 16;
 handles.videoWidth = 0;
 handles.videoHeight = 0;
+handles.charTemplate = load('./CharTemplate');
 handles.scene_number.String = num2str(handles.currentScene);
 guidata(hObject, handles);
 

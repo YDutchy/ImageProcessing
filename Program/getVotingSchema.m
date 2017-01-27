@@ -34,10 +34,10 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     bonus_yellow = ones(1, length(yellow_vert_edgeJudgement));
     bonus_white = zeros(1, length(white_vert_edgeJudgement));
     
-    size(bonus_white)
-    size(bbox_aspect_ratio_score_white)
-    size(white_charsplit_judgement)
-    size(white_vert_edgeJudgement)
+%     size(bonus_white)
+%     size(bbox_aspect_ratio_score_white)
+%     size(white_charsplit_judgement)
+%     size(white_vert_edgeJudgement)
     yellow_score = [bonus_yellow ; yellow_vert_edgeJudgement ; yellow_charsplit_judgement ; bbox_aspect_ratio_score_yellow]
     white_score =  [bonus_white ; white_vert_edgeJudgement ; white_charsplit_judgement ; bbox_aspect_ratio_score_white]
     yellow_total = sum(yellow_score)

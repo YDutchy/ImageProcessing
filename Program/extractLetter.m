@@ -1,20 +1,23 @@
-function extracted = extractLetter(island)
-load CharTemplate
-tic
+function extracted = extractLetter(island, charTemplate)
+charTemplate = charTemplate.CharTemplate;
+if (sum(sum(island)) < 10)
+    extracted  = '*';
+    return
+end
 letter = [];
 % figure(1), imshow(island);
 island = imresize(island, [42, 24]);
 % figure(2), imshow(island);
-island = double(dilation(island, 2));
+island = double(closing(island, 1.4));
 % figure(3), imshow(island);
 
-for i = 1:length(CharTemplate)
-    correlation = corr2(CharTemplate{1, i}, island);
+for i = 1:length(charTemplate)
+    correlation = corr2(charTemplate{1, i}, island);
     letter = [letter, correlation];
 end
 
 [sorted, index] = sort(letter);
-index = index(end-1);
+index = index(end);
 
 CharArray = ['A' 'A' 'B' 'B' 'B' 'C' 'D' 'D' 'E' 'F' 'G' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'N' 'O' 'O' 'P' 'P' 'P' 'Q' 'Q' ... %27 chars
     'R' 'R' 'S' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' 'Z' '1' '1' '2' '3' '4' '4' '5' '5' '5' '6' '6' '6' '7' '8' ... %26 chars

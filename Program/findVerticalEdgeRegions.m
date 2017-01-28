@@ -14,7 +14,7 @@ function [ binaryImage, bands ] = findVerticalEdgeRegions( grayData, gradient_v,
     a_v_dilated = dilation(a_v_dilated, 20, 'rectangular');
     a_v_dilated = closing(a_v_dilated, 8, 'rectangular');
     d_a_v_dilated = double(a_v_dilated);
-    figure, imshow(d_a_v_dilated)
+    figure, imshow(d_a_v_dilated);
     
     if(dividingIndices(1, 1) == 0)
         binaryImage = zeros(h, w);

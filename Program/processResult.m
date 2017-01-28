@@ -1,0 +1,1 @@
+function [] = processResult( characters )

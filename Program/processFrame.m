@@ -26,13 +26,13 @@ function [ result ] = detectCornersBySusan( frame, mask )
     % Geometric Threshold = 3 * n_max / 4, where n_max is the maximum area
     % of the mask in pixels
      geometricThreshold = (3 * maximumMaskArea) / 10;
-    [h w] = size(frame)
+    [h w] = size(frame);
     
     imStart_h = filterOffset;
     imStart_w = filterOffset;
     
-    imEnd_h = h - filterOffset - 1
-    imEnd_w = w - filterOffset - 1
+    imEnd_h = h - filterOffset - 1;
+    imEnd_w = w - filterOffset - 1;
     
     %parpool(4)
     %parfor x = imStart_h:imEnd_h

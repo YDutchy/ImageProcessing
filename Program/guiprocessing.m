@@ -98,7 +98,7 @@ function button_import_Callback(hObject, eventdata, handles)
    % handles.videoName = n;
    % handles.videoPath = filePath;
    % videoReader = VideoReader(strcat(filePath, n));
-    videoReader = VideoReader('./video.avi');
+    videoReader = VideoReader('./Trainingsvideo.avi');
     handles.videoHeight = videoReader.Height;
     handles.videoWidth = videoReader.Width;
 
@@ -294,5 +294,5 @@ stopVideo();
 % --- Executes on button press in go_back.
 function go_back_Callback(hObject, eventdata, handles)
     stopVideo
-    currentTime = handles.videoData.CurrentTime
+    currentTime = handles.videoData.CurrentTime;
     handles.videoData.CurrentTime = max(0, currentTime - handles.frameSkip);  

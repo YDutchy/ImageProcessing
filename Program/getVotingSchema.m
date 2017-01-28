@@ -23,13 +23,13 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     toc
     
     %yellow_bboxses
-    yellow_vert_edgeJudgement
-    yellow_charsplit_judgement
+    yellow_vert_edgeJudgement;
+    yellow_charsplit_judgement;
     bbox_aspect_ratio_score_yellow = scoreBoundingBoxesByAspectRatio(yellow_bboxes, handles.videoHeight, handles.videoWidth);
     %white_bboxses
     bbox_aspect_ratio_score_white = scoreBoundingBoxesByAspectRatio(white_bboxes, handles.videoHeight, handles.videoWidth);
-    white_vert_edgeJudgement
-    white_charsplit_judgement
+    white_vert_edgeJudgement;
+    white_charsplit_judgement;
     
     bonus_yellow = ones(1, length(yellow_vert_edgeJudgement));
     bonus_white = zeros(1, length(white_vert_edgeJudgement));
@@ -38,15 +38,15 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
 %     size(bbox_aspect_ratio_score_white)
 %     size(white_charsplit_judgement)
 %     size(white_vert_edgeJudgement)
-    yellow_score = [bonus_yellow ; yellow_vert_edgeJudgement ; yellow_charsplit_judgement ; bbox_aspect_ratio_score_yellow]
-    white_score =  [bonus_white ; white_vert_edgeJudgement ; white_charsplit_judgement ; bbox_aspect_ratio_score_white]
-    yellow_total = sum(yellow_score)
-    white_total = sum(white_score)
+    yellow_score = [bonus_yellow ; yellow_vert_edgeJudgement ; yellow_charsplit_judgement ; bbox_aspect_ratio_score_yellow];
+    white_score =  [bonus_white ; white_vert_edgeJudgement ; white_charsplit_judgement ; bbox_aspect_ratio_score_white];
+    yellow_total = sum(yellow_score);
+    white_total = sum(white_score);
     
     min_score_yellow = 2;
     min_score_white = 2;
-    [~, id_y] = sort(yellow_total)
-    [~, id_w] = max(white_total)
+    [~, id_y] = sort(yellow_total);
+    [~, id_w] = max(white_total);
     data_out = repmat(struct('BoundingBox', '0', 'char', '0'), 1, 4);
     
     count = 1;
@@ -54,10 +54,10 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     
     if ~isempty(id_y)
         for i = 1:length(id_y)
-            currentPlate_index = id_y(i)
+            currentPlate_index = id_y(i);
             if(yellow_total(currentPlate_index) >= min_score_yellow)
                 data_out(count).BoundingBox = yellow_bboxes(currentPlate_index);
-                yellow_charsplits(currentPlate_index)
+                yellow_charsplits(currentPlate_index);
                 data_out(count).char = yellow_charsplits(currentPlate_index);
                 count = count + 1;
             end
@@ -176,7 +176,7 @@ function [] = plotBoundingBoxes(bbox, colour)
 end
 
 function [] = plotCentroids(centroids, colour) 
-    centroids = cat(1, centroids.Centroid)
+    centroids = cat(1, centroids.Centroid);
     if(~isempty(centroids))
         hold on, plot(centroids(:, 1), centroids(:, 2), strcat(colour,'*')), hold off;
     end

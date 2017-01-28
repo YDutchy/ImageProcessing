@@ -38,10 +38,10 @@ end
 function [ CC, binaryImage ] = splitImproperAspectRatios(CC, boundingBoxes, binaryImage, aspect_max_deviation, aspectRatio_baseline)
     % Aspect ratio h/w 
     for i = 1:length(boundingBoxes)
-        bbox = boundingBoxes(i).BoundingBox
-        aspectRatio = bbox(4) / bbox(3)
-        b1 = aspectRatio_baseline - aspect_max_deviation
-        b2 = aspectRatio_baseline + aspect_max_deviation
+        bbox = boundingBoxes(i).BoundingBox;
+        aspectRatio = bbox(4) / bbox(3);
+        b1 = aspectRatio_baseline - aspect_max_deviation;
+        b2 = aspectRatio_baseline + aspect_max_deviation;
         if(aspectRatio < aspectRatio_baseline - aspect_max_deviation || aspectRatio > aspectRatio_baseline + aspect_max_deviation)
             binaryImage(CC.PixelIdxList{i}) = 0;
         end

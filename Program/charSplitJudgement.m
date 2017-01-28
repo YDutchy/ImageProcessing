@@ -4,7 +4,7 @@ function [ judgement ] = charSplitJudgement( data, char_count_lower, char_count_
 
     judgement = zeros(1, length(data));
     for k = 1:length(data)
-        current = data(k).islandsInBbox
+        current = data(k).islandsInBbox;
         
         if(isfield(current, 'refused'))
             %disp(['refused: ' current.refused])

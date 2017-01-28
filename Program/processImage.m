@@ -23,11 +23,11 @@ function [ imageData ] = processImage( imageData, handles )
             
     bin_split_data_yellow = splitYellow( hsvData );
     bin_split_data_yellow = bin_split_data_yellow & grayData > 72;
-    data_out = getVotingSchema( hsvData, grayData, handles )
+    data_out = getVotingSchema( hsvData, grayData, handles );
     
-    len = length(data_out)
+    len = length(data_out);
     t = 9;
-    indexToWatch = 2
+    indexToWatch = 1;
     if ~isempty(data_out)
         for i = 1:length(data_out(indexToWatch).char.islandsInBbox)            
             
@@ -61,6 +61,7 @@ function [ imageData ] = processImage( imageData, handles )
         end
     end
     valid_characters
+    processResult(valid_characters);
 end
 
 function [] = plotBoundingBoxes(bbox)

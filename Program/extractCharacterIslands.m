@@ -52,7 +52,7 @@ function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mo
             end
         end
     end
-   explainCharSplitArray(data);
+   %explainCharSplitArray(data);
 end
 
 function [ chars ] = splitChars(CC, fragment)

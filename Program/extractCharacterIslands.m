@@ -16,43 +16,35 @@ function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mo
     for i = 1:length(bboxses)
         image = getBoundingBoxImage(bboxses(i), grayData, h, w);
         image = histeq(image);
+        image = medfilt2(image);
         
-        % Use a brighter threshold in predominantly dark images
         mean_image = mean2(image);
-
-        % Dark image if result is negative
-        if (mean_image - 128 < 0)
-            mean_image = mean_image * 1.2;
-        end
-        
-        % Bright image if result is positive
-        if (mean_image - 128 >= 0)
-            mean_image = mean_image * 0.9;
-        end
         build_up_image = zeros(size(image));
         
         for th_it = -threshold_iterations:threshold_iterations
             mean_image_it = mean_image + (th_it*30);
-            image = image < mean_image_it;
-            image = imclearborder(image, 4);
-            image = double(closing(image, 1));
             
-            %figure, imshow(image), title(['charIsland ' num2str(i) '  - ' num2str(threshold_iterations) ' <-th ' num2str(mean_image)])
+            image = image < mean_image_it;
+            
+            image = imclearborder(image, 4);
+            image = double(closing(image, 1));            
+            
             CC = bwconncomp(image);
             [~, binaryImage] = stripSmallIslandsCC(CC, image, charsize_min, charsize_max);
             CC = bwconncomp(binaryImage);
             candidate = splitChars(CC, binaryImage);
             
-            build_up_image = ceil((build_up_image + binaryImage) ./ (1 + 2*threshold_iterations));
-            %figure, imshow(build_up_image)
+            build_up_image = (build_up_image + binaryImage);
+            
             if(~isfield(candidate, 'refused'))
                 if(th_it ~= threshold_iterations && length(data(i).islandsInBbox) < length(candidate))
                     data(i).islandsInBbox = candidate;
                 end
             end
         end
+        build_up_image = build_up_image ./ (1 + 2*threshold_iterations);
     end
-   explainCharSplitArray(data);
+   %explainCharSplitArray(data);
 end
 
 function [ chars ] = splitChars(CC, fragment)
@@ -60,12 +52,12 @@ function [ chars ] = splitChars(CC, fragment)
     r = regionprops(CC, 'Centroid');
     [h, w] = size(fragment);
     max_h_w_ratio = 4.5;
-    min_h_w_ratio = 1.1;
+    min_h_w_ratio = 1.3;
     
     min_char_count = 3;
     max_char_count = 14;
     max_height = h;
-    min_area = 50;
+    min_area = 40;
     min_height = max(4, h * 1/30);
     max_variance_height_centroid = 600;
     centroids = cat(1, r.Centroid);

@@ -22,7 +22,7 @@ function varargout = guiprocessing(varargin)
 
 % Edit the above text to modify the response to help guiprocessing
 
-% Last Modified by GUIDE v2.5 19-Jan-2017 23:18:29
+% Last Modified by GUIDE v2.5 14-Feb-2017 13:26:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -282,6 +282,7 @@ function lp_test_Callback(hObject, eventdata, handles)
 % hObject    handle to lp_test (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.doDump = 0;
 processImage(handles.lastFrame, handles);          
 
 
@@ -296,3 +297,41 @@ function go_back_Callback(hObject, eventdata, handles)
     stopVideo
     currentTime = handles.videoData.CurrentTime
     handles.videoData.CurrentTime = max(0, currentTime - handles.frameSkip);  
+
+
+% --- Executes on button press in button_dumpchars.
+function button_dumpchars_Callback(hObject, eventdata, handles)
+% hObject    handle to button_dumpchars (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+strNow = datestr(datetime('now'));
+strNow = strrep(strNow,' ','_');
+strNow = strrep(strNow,':','-');
+
+dump_folder_name = 'dumpdata';
+
+if(exist(dump_folder_name) ~= 7)
+    mkdir(dump_folder_name);
+end
+dumplocation = strcat('./', dump_folder_name, '/', strNow)
+mkdir(dumplocation);
+handles.dumplocation = dumplocation;
+handles.doDump = 1;
+processImage(handles.lastFrame, handles);   
+handles.doDump = 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

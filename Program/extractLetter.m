@@ -5,11 +5,12 @@ if (sum(sum(island)) < 10)
     return
 end
 letter = [];
-% figure(1), imshow(island);
+%figure(1), imshow(island);
 island = imresize(island, [42, 24]);
-% figure(2), imshow(island);
+%figure(2), imshow(island);
 island = double(closing(island, 1.4));
-% figure(3), imshow(island);
+
+%figure, imshow(island(:, 1:10))
 
 for i = 1:length(charTemplate)
     correlation = corr2(charTemplate{1, i}, island);
@@ -24,6 +25,5 @@ CharArray = ['A' 'A' 'B' 'B' 'B' 'C' 'D' 'D' 'D' 'E' 'F' 'G' 'G' 'H' 'H' 'I' 'J'
     '8' '8' '8' '9' '9' '0' '0' '0'];
 extracted = CharArray(index);
 
-toc
 % End function
 end

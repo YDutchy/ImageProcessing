@@ -17,7 +17,7 @@ function [  ] = explainCharSplitArray( data )
         for j = 1:length(current)
             current(j).char
             if(~isfield(current(j).char, 'refused'))
-                %figure, imshow(current(j).char), title(['Found ' num2str(length(current(j))) ' objects'])
+                figure, imshow(current(j).char), title(['Found ' num2str(length(current(j))) ' objects'])
             else
                 disp(['Refused island: ' current(j).char.refused])
             end

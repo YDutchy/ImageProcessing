@@ -16,18 +16,24 @@ function [ imageData ] = processImage( imageData, handles )
 
     hsvData(:, :, 1) = imadjust(hsvData(:, :, 1),stretchlim(hsvData(:, :, 1)),[]);
     hsvData(:, :, 3) = imadjust(hsvData(:, :, 3),stretchlim(hsvData(:, :, 3)),[]);
-    mayorHorizontalEdgeGradient = sobelEdge_H(grayData);
     mayorVerticalEdgeGradient = medfilt2(sobelEdge_V(grayData), [7, 7]);
-    bothEdgeGradients = mayorHorizontalEdgeGradient | mayorVerticalEdgeGradient;
-    split = double(closing(bothEdgeGradients, 1, 'Rectangular'));
-            
-    bin_split_data_yellow = splitYellow( hsvData );
-    bin_split_data_yellow = bin_split_data_yellow & grayData > 72;
+                   
+     bin_split_data_yellow = splitYellow( hsvData );
+
     data_out = getVotingSchema( hsvData, grayData, handles )
+    
+    updateAxes(mayorVerticalEdgeGradient, handles, 6), title('Vertical edges');
+    updateAxes(hsvData(:, :, 1), handles, 7), title('Hue masked on yellow');
+    axes(handles.axes5);
+    histogram(hsvData(:, :, 1), 100), title('hue distribution')
     
     len = length(data_out)
     t = 9;
+
     indexToWatch = 2
+    if(indexToWatch > len)
+        indexToWatch = len
+    end
     if ~isempty(data_out)
         for i = 1:length(data_out(indexToWatch).char.islandsInBbox)            
             
@@ -52,15 +58,31 @@ function [ imageData ] = processImage( imageData, handles )
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
                     continue
                 end
+ 
                 letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.charTemplate)
                 collectedChars = [collectedChars, letter];
             end
-            if (length(collectedChars) >= 6)
-                valid_characters = [valid_characters ; collectedChars];
+            if (length(collectedChars) >= 5)
+                valid_characters = strcat(valid_characters, [' | ', collectedChars]);
+                %valid_characters = [valid_characters ; collectedChars];
             end
         end
     end
-    valid_characters
+    handles.text6.String = valid_characters;
+    
+    if(handles.doDump)
+        for data_index = 1:length(data_out)
+            for i = 1:length(data_out(data_index).char.islandsInBbox)
+                if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
+                    continue
+                end
+                img = imresize(data_out(data_index).char.islandsInBbox(i).char, [42, 24]);
+                strcat(handles.dumplocation, num2str(i))
+                imwrite(img, strcat(handles.dumplocation, '/', num2str(i), '.png'), 'png');
+            end
+        end
+    end
+    
 end
 
 function [] = plotBoundingBoxes(bbox)

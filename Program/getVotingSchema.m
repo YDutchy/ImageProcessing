@@ -1,7 +1,8 @@
 function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
 % IN: image
 % OUT: struct/array with license-plate regions and their respective scores
-
+    updateAxes(0, handles, 3);
+    updateAxes(0, handles, 4);
     [yellow_bboxes, yellow_centroids, binaryImageYellow] = getYellowPlateRegions( hsvData, handles );
     [white_bboxes, white_centroids, binaryImageWhite] = getWhitePlateRegions( grayData, handles );
     %all_bboxses = cat(1, yellow_bboxses, white_bboxses);
@@ -145,14 +146,17 @@ end
 function [ bboxes, centroids, binaryImage ] = getYellowPlateRegions( hsvData, handles )
     min_size = 2000;
     max_size = handles.videoHeight * handles.videoWidth * (1/5);
+    max_width = handles.videoWidth * 0.8;
+    max_height = handles.videoHeight * 0.8;
     % -- move into handles later
 
     binaryImage = splitYellow( hsvData );
     CC = bwconncomp(binaryImage);
     [~, binaryImage] = stripSmallIslandsCC(CC, binaryImage, min_size, max_size);
     CC = bwconncomp(binaryImage);
-    centroids = regionprops(CC, 'Centroid');
     bboxes = regionprops(CC, 'BoundingBox');
+    centroids = regionprops(CC, 'Centroid');
+    
 end
 
 function [ bboxes, centroids, binaryImage ] = getWhitePlateRegions( grayData, handles )

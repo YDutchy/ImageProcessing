@@ -27,6 +27,7 @@ function [ imageData ] = processImage( imageData, handles )
     axes(handles.axes5);
     histogram(hsvData(:, :, 1), 100), title('hue distribution')
     
+
     len = length(data_out)
     t = 9;
 
@@ -77,7 +78,6 @@ function [ imageData ] = processImage( imageData, handles )
                     continue
                 end
                 img = imresize(data_out(data_index).char.islandsInBbox(i).char, [42, 24]);
-                strcat(handles.dumplocation, num2str(i))
                 imwrite(img, strcat(handles.dumplocation, '/', num2str(i), '.png'), 'png');
             end
         end

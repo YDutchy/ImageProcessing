@@ -22,7 +22,7 @@ function varargout = guiprocessing(varargin)
 
 % Edit the above text to modify the response to help guiprocessing
 
-% Last Modified by GUIDE v2.5 14-Feb-2017 13:26:18
+% Last Modified by GUIDE v2.5 19-Feb-2017 17:38:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -47,7 +47,6 @@ end
 % ATTENTION: PLEASE PRE-LOAD DIPIMAGE AND COMMENT OUT THE RUN LINE, or change the path~
 function [  ] = startDIP( )
     run('C:\Program Files\DIPimage 2.8\dipstart.m')
-    dipimage
 
 % --- Executes just before guiprocessing is made visible.
 function guiprocessing_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -67,10 +66,9 @@ handles.currentScene = 0;
 handles.frameSkip = 16;
 handles.videoWidth = 0;
 handles.videoHeight = 0;
-handles.charTemplate = load('./CharTemplate');
 handles.scene_number.String = num2str(handles.currentScene);
+handles = refreshTemplateData(1, handles);
 guidata(hObject, handles);
-
 
 % UIWAIT makes guiprocessing wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -310,7 +308,7 @@ strNow = strrep(strNow,':','-');
 
 dump_folder_name = 'dumpdata';
 
-if(exist(dump_folder_name) ~= 7)
+if(exist(dump_folder_name, 'dir') ~= 7)
     mkdir(dump_folder_name);
 end
 dumplocation = strcat('./', dump_folder_name, '/', strNow)
@@ -320,17 +318,21 @@ handles.doDump = 1;
 processImage(handles.lastFrame, handles);   
 handles.doDump = 0;
 
+if (length(dir(dump_folder_name)) < 3)
+    rmdir(dump_folder_name);
+end
+
+function [handles] = refreshTemplateData(showdlg, handles)
+    saveFile = 'templateData.mat';
+    dataMatrix = setupDataset( saveFile, showdlg );
+    handles.templateData = dataMatrix;
 
 
-
-
-
-
-
-
-
-
-
+% --- Executes on button press in template_refresh.
+function template_refresh_Callback(hObject, eventdata, handles)
+% Reads in the dataMatrix created by the dataset function
+    handles = refreshTemplateData(1, handles)
+    guidata(hObject, handles);
 
 
 

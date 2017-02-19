@@ -1,29 +1,41 @@
-function extracted = extractLetter(island, charTemplate)
-charTemplate = charTemplate.CharTemplate;
+function extracted = extractLetter(island, dataMatrix)
 if (sum(sum(island)) < 10)
     extracted  = '*';
     return
 end
-letter = [];
-%figure(1), imshow(island);
+
+%Uncomment to enable full-spectrum with sorting.
+%1 scores = zeros(1, length(dataMatrix)); 
 island = imresize(island, [42, 24]);
-%figure(2), imshow(island);
-island = double(closing(island, 1.4));
+max_score_index = 1;
+max_score = -1;
 
-%figure, imshow(island(:, 1:10))
-
-for i = 1:length(charTemplate)
-    correlation = corr2(charTemplate{1, i}, island);
-    letter = [letter, correlation];
+for i = 1:length(dataMatrix)
+    currentCharTemplates = dataMatrix{i};
+    
+    if(isempty(currentCharTemplates))
+        %2 scores(i) = -1;
+        continue 
+    end
+    
+    correlation = 0;
+    for j = 1:length(currentCharTemplates)
+        correlation = correlation + corr2(currentCharTemplates{j}, island);
+    end
+    correlation = correlation / length(currentCharTemplates);
+    
+    if(correlation > max_score)
+        max_score_index = i;
+        max_score = correlation;
+    end
+    disp(['Char: ' charFromIndex(i) ' - Corr: ' num2str(correlation)])
+    %3 scores(i) = correlation;
 end
 
-[sorted, index] = sort(letter);
-index = index(end);
+%4 [sorted, index] = sort(scores);
+%5 index = index(end);
 
-CharArray = ['A' 'A' 'B' 'B' 'B' 'C' 'D' 'D' 'D' 'E' 'F' 'G' 'G' 'H' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'N' 'O' 'O' 'P' 'P' 'P' 'Q' 'Q' ... %29 chars
-    'R' 'R' 'S' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' 'Z' '1' '1' '2' '3' '4' '4' '5' '5' '5' '6' '6' '6' '7' '8' ... %26 chars
-    '8' '8' '8' '9' '9' '0' '0' '0'];
-extracted = CharArray(index);
-
+extracted = charFromIndex(max_score_index);
+%6 extracted = charFromIndex(index);
 % End function
 end

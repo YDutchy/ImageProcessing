@@ -59,8 +59,8 @@ function [ imageData ] = processImage( imageData, handles )
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
                     continue
                 end
- 
-                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.charTemplate)
+                handles
+                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.templateData)
                 collectedChars = [collectedChars, letter];
             end
             if (length(collectedChars) >= 5)
@@ -77,8 +77,9 @@ function [ imageData ] = processImage( imageData, handles )
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
                     continue
                 end
+                fname = char(java.util.UUID.randomUUID);
                 img = imresize(data_out(data_index).char.islandsInBbox(i).char, [42, 24]);
-                imwrite(img, strcat(handles.dumplocation, '/', num2str(i), '.png'), 'png');
+                imwrite(img, strcat(handles.dumplocation, '/', fname, '.png'), 'png');
             end
         end
     end

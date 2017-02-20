@@ -329,9 +329,9 @@ function [handles] = refreshTemplateData(showdlg, handles)
 
 
 % --- Executes on button press in template_refresh.
-function template_refresh_Callback(hObject, eventdata, handles)
+function template_refresh_Callback(hObject, ~, handles)
 % Reads in the dataMatrix created by the dataset function
-    handles = refreshTemplateData(1, handles)
+    handles = refreshTemplateData(1, handles);
     guidata(hObject, handles);
 
 

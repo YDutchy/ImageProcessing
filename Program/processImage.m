@@ -18,7 +18,7 @@ function [ imageData ] = processImage( imageData, handles )
     hsvData(:, :, 3) = imadjust(hsvData(:, :, 3),stretchlim(hsvData(:, :, 3)),[]);
     mayorVerticalEdgeGradient = medfilt2(sobelEdge_V(grayData), [7, 7]);
                    
-     bin_split_data_yellow = splitYellow( hsvData );
+    bin_split_data_yellow = splitYellow( hsvData );
 
     data_out = getVotingSchema( hsvData, grayData, handles )
     
@@ -59,8 +59,7 @@ function [ imageData ] = processImage( imageData, handles )
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
                     continue
                 end
-                handles
-                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.templateData)
+                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.templateData);
                 collectedChars = [collectedChars, letter];
             end
             if (length(collectedChars) >= 5)

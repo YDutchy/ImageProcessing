@@ -1,36 +1,20 @@
 function [ binaryImage ] = splitYellow( hsvData )
 % Split a yellowish plate
-    hue_threshold_lower_orange = 0.07; % 0.0417
-    hue_threshold_upper_orange = 0.15; % 0.1111   
+    hue_threshold_lower_orange = 0.061; 
+    hue_threshold_upper_orange = 0.16; 
     val_threshold = 0.30;
-    mean2(hsvData(:, :, 3))
-    sat_threshold = 0.31;
-    %figure, histogram(hsvData(294:318, 484:588, 1), 160)
+    sat_threshold = 0.21;
+
     % Yellow/Orange plate case: 
     binaryImage = ( hsvData(:, :, 1) > hue_threshold_lower_orange & hsvData(:, :, 1) < hue_threshold_upper_orange);
-    binaryImage = binaryImage & hsvData(:, :, 3) >= val_threshold & hsvData(:, :, 3)>= sat_threshold;
-    binaryImage = dip_image(binaryImage);
-    binaryImage = closing(binaryImage, 20, 'rectangular');
-    binaryImage = double(binaryImage);
-end   
+    binaryImage = binaryImage & hsvData(:, :, 3) >= val_threshold & hsvData(:, :, 2) >= sat_threshold;
 
-% binaryImage = findStableHueRegion(hsvData, hue_threshold_lower_orange, hue_threshold_upper_orange,  3, 0.02);
-function [ binaryImage ] = findStableHueRegion( hsvData, base_hue_lower, base_hue_upper, iterations, stepSize ) 
-    totalSteps = (iterations*2 + 1)
-    stableRegion_threshold = totalSteps * 0.9; % 50% of the cases should have a white speck to be stable!
+    binaryImage = dip_image(binaryImage);
+    binaryImage = opening(binaryImage, 4, 'rectangular');
     
-    stableRegion = hsvData(:, :, 1) > base_hue_lower & hsvData(:, :, 1) < base_hue_upper;
-    figure, imshow(stableRegion), title(['1 - 0']);
-    for i = 1:iterations
-        imshow(stableRegion), title(['1 - ' num2str(i)]);
-        stableRegion = stableRegion + (hsvData(:, :, 1) > base_hue_lower - (i * stepSize) & hsvData(:, :, 1) < base_hue_upper - (i * stepSize));
-        pause(1)
-    end
-    for i = 1:iterations
-        imshow(stableRegion), title(['2 - ' num2str(i)]);
-        stableRegion = stableRegion + (hsvData(:, :, 1) > base_hue_lower + (i * stepSize) & hsvData(:, :, 1) < base_hue_upper + (i * stepSize));
-        pause(1)
-    end
-    binaryImage = stableRegion ./ totalSteps;
-    imshow(stableRegion);
-end
+    binaryImage = closing(binaryImage, 17, 'rectangular');
+    binaryImage = double(binaryImage);
+    binaryImage = imclearborder(binaryImage);
+   
+end   
+%     figure, imshow(binaryImage)

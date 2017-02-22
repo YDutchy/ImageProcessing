@@ -63,11 +63,20 @@ handles.output = hObject;
 setRunning(0);
 handles.lastFrame = 0;
 handles.currentScene = 0;
-handles.frameSkip = 16;
-handles.videoWidth = 0;
-handles.videoHeight = 0;
-handles.scene_number.String = num2str(handles.currentScene);
+handles.frameSkip = 8;
+perfHandles = struct;
+perfHandles.debugMode = 1;
+perfHandles.videoHeight = 0;
+perfHandles.videoWidth = 0;
+perfHandles.doDump = 0;
 handles = refreshTemplateData(1, handles);
+
+handles.perfHandles = perfHandles;
+handles.scene_number.String = num2str(handles.currentScene);
+
+if(isempty(gcp('nocreate')))
+    parpool(4);
+end
 guidata(hObject, handles);
 
 % UIWAIT makes guiprocessing wait for user response (see UIRESUME)
@@ -97,8 +106,8 @@ function button_import_Callback(hObject, eventdata, handles)
    % handles.videoPath = filePath;
    % videoReader = VideoReader(strcat(filePath, n));
     videoReader = VideoReader('./video.avi');
-    handles.videoHeight = videoReader.Height;
-    handles.videoWidth = videoReader.Width;
+    handles.perfHandles.videoHeight = videoReader.Height;
+    handles.perfHandles.videoWidth = videoReader.Width;
 
 
 if(~isa(videoReader, 'VideoReader'))
@@ -106,20 +115,40 @@ if(~isa(videoReader, 'VideoReader'))
 else
    handles.videoData = videoReader;
    handles.currentScene = 0;
-   guidata(hObject, handles);
    [a, frame, c] = stepFrame(hObject, handles);     % Always step a frame after loading.
    [h, w] = size(frame);
-   handles.videoHeight = h;
-   handles.videoWidth = w;
+   handles.perfHandles.videoHeight = h;
+   handles.perfHandles.videoWidth = w;
+   %handles.precomputeData = precomputeVideo(videoReader, handles);
+   videoReader.CurrentTime = 0;
+   guidata(hObject, handles);
 end   
+
+function [ precomputeData ] = precomputeVideo(videoR, handles)
+    approx_frameCount = ceil((videoR.FrameRate * videoR.Duration) / 4);
+    videoFrames = cell(1, approx_frameCount);
+    videoFrames{1} = readFrame(videoR);
+    vd_ind = 2;
+    while hasFrame(videoR)
+        i = 1;
+        while hasFrame(videoR) && i <= handles.frameSkip
+            readFrame(videoR);
+            i = i + 1;
+        end
+        vd_ind = vd_ind + 1;
+    end
+    precomputeData = videoFrames;
+
     
 % Steps a single frame
 function [ handles, frame, canContinue ] = stepFrame(hObject, handles) 
    if isfield(handles, 'videoData')
        videoReader = handles.videoData;
        if hasFrame(videoReader)
-           for i = 1:handles.frameSkip
+           i = 1;
+           while hasFrame(videoReader) && i ~= handles.frameSkip
                readFrame(videoReader);
+               i = i + 1;
            end
            frame = readFrame(videoReader); 
            handles.lastFrame = frame;
@@ -131,6 +160,31 @@ function [ handles, frame, canContinue ] = stepFrame(hObject, handles)
    else
        warndlg('No video file specified!')
    end
+   
+% Steps parallel frames
+function [ frames, canContinue, times, frameNumbers, currentFrameCount ] = stepParallelFrames(videoReader, frameSkip, currentFrameCount) 
+       frames = cell(1, 4);
+       canContinue = 0;
+       times = cell(1, 4);
+       frameNumbers = cell(1, 4);
+       if hasFrame(videoReader)
+           frame_ind = 1;
+           while hasFrame(videoReader) && frame_ind <= 4
+               frames{frame_ind} = readFrame(videoReader);
+               frameNumbers{frame_ind} = currentFrameCount;
+               times{frame_ind} = videoReader.CurrentTime;
+               currentFrameCount = currentFrameCount + 1;
+               i = 1;
+               while hasFrame(videoReader) &&  i <= frameSkip
+                   readFrame(videoReader);
+                   currentFrameCount = currentFrameCount + 1;
+                   i = 1 + 1;
+               end
+               frame_ind = frame_ind + 1;
+           end
+           canContinue = hasFrame(videoReader);
+        end
+      
 
 % I still don't like the handles mechanic since it's pass by value :(
 function [] = doRun(a)
@@ -164,25 +218,48 @@ if(~isfield(handles, 'videoData'))
     return
 end
 
-% Clear the table of results
-button_clearTable_Callback(hObject, 0, handles);
-
 if(isRunning == 0)
     doRun(1);
     setRunning(1);
     c = 1;
+    handles.videoData.CurrentTime = 0;
+    currentFrameCount = 0;
     
+    data_out = cell(60, 3);
+    idx = 1;
     % Processing loop
-    while(shouldRun == 1 && c)
-        [newHandles, frame, canContinue] = stepFrame(hObject, handles);
-        c = canContinue;
-        handles = newHandles;
-        processImage( frame, handles );
+    while(shouldRun == 1 && c == 1)
+        [ results, c, times, frameNumbers, currentFrameCount ] = processCurrentParallelly(handles.videoData, handles.frameSkip, handles, currentFrameCount);
+        for i = 1:length(results)
+            data_out{idx, 1} = results{i};
+            data_out{idx, 2} = frameNumbers{i};
+            data_out{idx, 3} = times{i};
+            idx = idx + 1;
+        end
     end
+    save('data_out.mat', data_out);
     setRunning(0);    
 else
      warndlg('Already running! >:O')
 end
+
+function [ results, canContinue, times, frameNumbers, currentFrameCount ] = processCurrentParallelly(videoReader, frameSkip, handles, currentFrameCount)
+        [ frames, canContinue, times, frameNumbers, currentFrameCount ] = stepParallelFrames(videoReader, frameSkip, currentFrameCount);
+        if (canContinue == 0)
+            results = 0;
+            return
+        end
+        results = cell(1, 4);
+        perfHandles = handles.perfHandles; 
+        perfHandles.debugMode = 0;  % Never run debugmode in parallel
+        templateData = handles.templateData;
+                
+        for i = 1:4
+            results{i} = processImage(frames{i}, perfHandles, templateData, 0);
+        end
+        for i = 1:4
+            updateAxes(frames{i}, handles, i);
+        end
 
 function edit1_Callback(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
@@ -241,13 +318,13 @@ function button_reset_Callback(hObject, eventdata, handles)
 
 if isfield(handles, 'videoData')
     cla(handles.videoAxis, 'reset');            % Clear the axes frame
-    handles = rmfield(handles, 'lastFrame');    % Remove the lastframe field
     handles.videoData.CurrentTime = 0;          % Set video-frame to 0 again
     handles.currentScene = 0;                   % Reset current scene counter
     doRun(0);                                   % Disable the run-loop
-    handles.scene_number.String = num2str(handles.currentScene);    % Reset the GUI-counter
     stepFrame(hObject, handles);                % Step to the first frame of the video
     setRunning(0);
+    handles.lastFrame = stepFrame(hObject, handles);
+    guidata(hObject, handles);
 else
     warndlg('No video file specified!')
 end
@@ -255,13 +332,22 @@ end
 % --- Executes on button press in button_current.
 function button_current_Callback(hObject, eventdata, handles)
 % Processes just the current frame and writes it to the table.
-    processImage(handles.lastFrame, handles);
+    processImage(handles.lastFrame, handles, handles, handles.doDump);
 
 
 % --- Executes on button press in button_clearTable.
 function button_clearTable_Callback(hObject, eventdata, handles)
 % Clears the table that keeps track of the fruits.
-handles.table_fruit.Data = {};
+[ results, c, times, frameNumbers, currentFrameCount ]  = processCurrentParallelly(handles.videoData, handles.frameSkip, handles, Inf);
+        if(results == 0)
+            return
+        end
+        for i = 1:length(results)
+            strings = results{i};
+            if(iscell(strings))
+                {strings{1:end}, frameNumbers{i}, times{i}}
+            end
+        end
 
 
 % --- Executes when user attempts to close figure1.
@@ -280,9 +366,22 @@ function lp_test_Callback(hObject, eventdata, handles)
 % hObject    handle to lp_test (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.doDump = 0;
-processImage(handles.lastFrame, handles);          
 
+if( (~isfield(handles, 'lastFrame')) || length(handles.lastFrame) == 1)
+    [ handles, frame, ~ ] = stepFrame(hObject, handles);
+    handles.lastFrame = frame;
+end
+templateData = handles.templateData;
+
+if(handles.perfHandles.debugMode)
+    handles.debugMode = handles.perfHandles.debugMode;
+    handles.videoHeight = handles.perfHandles.videoHeight;
+    handles.videoWidth = handles.perfHandles.videoWidth;
+    processImage(handles.lastFrame, handles, templateData, handles.perfHandles.doDump); 
+else
+    processImage(handles.lastFrame, handles.perfHandles, templateData);  
+end
+guidata(hObject, handles);
 
 % --- Executes on button press in stop_button.
 function stop_button_Callback(hObject, eventdata, handles)
@@ -314,9 +413,9 @@ end
 dumplocation = strcat('./', dump_folder_name, '/', strNow)
 mkdir(dumplocation);
 handles.dumplocation = dumplocation;
-handles.doDump = 1;
-processImage(handles.lastFrame, handles);   
-handles.doDump = 0;
+handles.perfHandles.doDump = 1;
+processImage(handles.lastFrame, handles, handles.templateData, handles.perfHandles.doDump);   
+handles.perfHandles.doDump = 0;
 
 if (length(dir(dump_folder_name)) < 3)
     rmdir(dump_folder_name);

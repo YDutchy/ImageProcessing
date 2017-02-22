@@ -1,9 +1,9 @@
 function [ binaryImage ] = splitWhitePlate( grayData )  
     % White/black plate case: 
+    ngc = strel('rectangle', [15, 15]);
+    
     binaryImage = grayData > 120;
-    binaryImage = dip_image(binaryImage);
-    closing(binaryImage, 15, 'rectangular');
-    binaryImage = double(binaryImage);
+    imclose(binaryImage, ngc);
     binaryImage = imclearborder(binaryImage);
 end
 

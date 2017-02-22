@@ -1,13 +1,16 @@
 function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
 % IN: image
 % OUT: struct/array with license-plate regions and their respective scores
-    updateAxes(0, handles, 3);
-    updateAxes(0, handles, 4);
+    if(handles.debugMode)
+        updateAxes(0, handles, 3);
+        updateAxes(0, handles, 4);
+    end
+    
     oldHeight = -1;
     oldWidth = -1;
     
     [yellow_bboxes, yellow_centroids, binaryImageYellow] = getPlateRegionsFor(splitYellow(hsvData), grayData, handles);
-    [white_bboxes, white_centroids, binaryImageWhite] = getPlateRegionsFor(splitWhitePlate(grayData), grayData, handles );
+    [white_bboxes, white_centroids, binaryImageWhite] = getPlateRegionsFor(splitWhitePlate(grayData), grayData, handles );   
     
     [yellow_total, yellow_charsplits ] = scoreSplitData(yellow_bboxes, hsvData, grayData, binaryImageYellow, handles);
     [white_total, white_charsplits ] = scoreSplitData(white_bboxes, hsvData, grayData, binaryImageWhite, handles);
@@ -15,8 +18,8 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     yellow_total = yellow_total + 1;    % Bonus for yellow regions
     min_score_yellow = 2;
     min_score_white = 2;
-    [~, id_y] = sort(yellow_total)
-    [~, id_w] = max(white_total)
+    [~, id_y] = sort(yellow_total);
+    [~, id_w] = max(white_total);
     
     
     
@@ -27,10 +30,10 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
     
     if ~isempty(id_y)
         for i = 1:length(id_y)
-            currentPlate_index = id_y(i)
+            currentPlate_index = id_y(i);
             if(yellow_total(currentPlate_index) >= min_score_yellow)
                 data_out(count).BoundingBox = yellow_bboxes(currentPlate_index);
-                yellow_charsplits(currentPlate_index)
+                yellow_charsplits(currentPlate_index);
                 data_out(count).char = yellow_charsplits(currentPlate_index);
                 count = count + 1;
             end
@@ -47,20 +50,22 @@ function [ data_out ] = getVotingSchema( hsvData, grayData, handles )
         end
     end
     data_out(count:end) = [];
-   
-    updateAxes(grayData, handles, 2);
-    plotBoundingBoxes(yellow_bboxes, 'y');
-    plotCentroids(yellow_centroids, 'r');
-    plotBoundingBoxes(white_bboxes, 'w');
-    plotCentroids(white_centroids, 'b');
     
-    if ~isempty(data_out)
-        im = getBoundingBoxImage(data_out(1).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
-        updateAxes(im, handles, 3);
-    end
-    if length(data_out) >= 2
-        im = getBoundingBoxImage(data_out(2).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
-        updateAxes(im, handles, 4);
+    if (handles.debugMode)
+        updateAxes(grayData, handles, 2);
+        plotBoundingBoxes(yellow_bboxes, 'y');
+        plotCentroids(yellow_centroids, 'r');
+        plotBoundingBoxes(white_bboxes, 'w');
+        plotCentroids(white_centroids, 'b');
+
+        if ~isempty(data_out)
+            im = getBoundingBoxImage(data_out(1).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
+            updateAxes(im, handles, 3);
+        end
+        if length(data_out) >= 2
+            im = getBoundingBoxImage(data_out(2).BoundingBox, grayData, handles.videoHeight, handles.videoWidth);
+            updateAxes(im, handles, 4);
+        end
     end
     
     % Restore old video-height /width if it was changed

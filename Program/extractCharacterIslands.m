@@ -19,29 +19,21 @@ function [ data ] = extractCharacterIslands(bboxses, hsvData, grayData, h, w, mo
         src_image = imboxfilt(src_image, 3); 
         src_image = imsharpen(src_image, 'Amount' , 5);
         src_image = histeq(src_image);
-        src_image = medfilt2(src_image);
-        if(mode == 0)
-            s_image = getBoundingBoxImage(bboxses(i), hsvData(:, :, 2), h, w);
-            v_image = getBoundingBoxImage(bboxses(i), hsvData(:, :, 3), h, w);
-            test = double(clip(src_image - uint8(30 .* (s_image > 0.80 & v_image > 0.11))));
-            figure, imshow(test), title('asdas')
-        end
+        src_image = medfilt2(src_image, [5, 1]);
         
         mean_image = mean2(src_image);
-        build_up_image = zeros(size(src_image));
                 
         for th_it = -threshold_iterations:threshold_iterations
-            mean_image_it = mean_image + (th_it*8);
+            mean_image_it = mean_image + (th_it*16);
             
             image = src_image < mean_image_it;
             image = preprocessCharIslands(image);
        
             CC = bwconncomp(image);            
-            [~, binaryImage] = stripIslandsBelowAverageCC(CC, image, 0.5);
-            
+            [~, binaryImage] = stripIslandsBelowAverageCC(CC, image, 0.7);
+
             CC = bwconncomp(binaryImage);
             candidate = splitChars(CC, binaryImage);
-            build_up_image = build_up_image + binaryImage;
             
             if(~isfield(candidate, 'refused'))
                 if(th_it <= threshold_iterations && (length(candidate) > length(data(i).islandsInBbox) && length(candidate) <= 9))
@@ -108,7 +100,7 @@ function [ chars ] = splitChars(CC, fragment)
         if (bbox_array(4) <= min_height || bbox_array(4) > max_height)
             disp('Illegal sized bbox')
             chars(i).char = struct('refused', 'Illegal sized bbox');
-            figure, imshow(fragment), title(['Illegal sized bbox: ' num2str(bbox_array(4)) ' - ' num2str(bbox_array(3)) ])
+            %figure, imshow(fragment), title(['Illegal sized bbox: ' num2str(bbox_array(4)) ' - ' num2str(bbox_array(3)) ])
             continue;
         end
         

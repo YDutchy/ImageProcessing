@@ -15,12 +15,18 @@ function extracted = extractLetter(island, dataMatrix)
             continue 
         end
 
-        correlation = 0;
+        max_corr = -1;
+        %correlation = 0;
         for j = 1:length(currentCharTemplates)
-            correlation = correlation + corr2(currentCharTemplates{j}, island);
+            %correlation = correlation + corr2(currentCharTemplates{j}, island);
+            corr = corr2(currentCharTemplates{j}, island);
+            if(corr > max_corr)
+                max_corr = corr;
+            end
         end
-        correlation = correlation / length(currentCharTemplates);
-
+        %correlation = correlation / length(currentCharTemplates);
+        correlation = max_corr;
+        
         if(correlation > max_score)
             max_score_index = i;
             max_score = correlation;

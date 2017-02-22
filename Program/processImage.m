@@ -1,11 +1,13 @@
-function [ imageData ] = processImage( imageData, handles )
-    for i = 8:15
-        updateAxes(0, handles, i);
+function [ strings ] = processImage( imageData, handles, templateData, doDump )
+    
+    if(handles.debugMode)
+        for i = 8:15
+            updateAxes(0, handles, i);
+        end
     end
 
     % Main entry point for image processing. All re-usable data should be 
     % declared here and passed along to each subsystem.
-    tic
     % Gray data
     grayData = rgb2gray(imageData);
     grayData = medfilt2(grayData);
@@ -16,40 +18,38 @@ function [ imageData ] = processImage( imageData, handles )
 
     hsvData(:, :, 1) = imadjust(hsvData(:, :, 1),stretchlim(hsvData(:, :, 1)),[]);
     hsvData(:, :, 3) = imadjust(hsvData(:, :, 3),stretchlim(hsvData(:, :, 3)),[]);
-    mayorVerticalEdgeGradient = medfilt2(sobelEdge_V(grayData), [7, 7]);
-                   
-    bin_split_data_yellow = splitYellow( hsvData );
 
-    data_out = getVotingSchema( hsvData, grayData, handles )
+    data_out = getVotingSchema( hsvData, grayData, handles );
     
-    updateAxes(mayorVerticalEdgeGradient, handles, 6), title('Vertical edges');
-    updateAxes(hsvData(:, :, 1), handles, 7), title('Hue masked on yellow');
-    axes(handles.axes5);
-    histogram(hsvData(:, :, 1), 100), title('hue distribution')
-    
+    if(handles.debugMode)
+        updateAxes(hsvData(:, :, 1), handles, 7), title('Hue masked on yellow');
+        axes(handles.axes5);
+        histogram(hsvData(:, :, 1), 100), title('hue distribution')
 
-    len = length(data_out)
-    t = 9;
+        len = length(data_out);
+        t = 9;
+        indexToWatch = 1
+        if(indexToWatch > len)
+            indexToWatch = len
+        end
+        if ~isempty(data_out)
+            for i = 1:length(data_out(indexToWatch).char.islandsInBbox)            
 
-    indexToWatch = 2
-    if(indexToWatch > len)
-        indexToWatch = len
-    end
-    if ~isempty(data_out)
-        for i = 1:length(data_out(indexToWatch).char.islandsInBbox)            
-            
-            if(isstruct(data_out(indexToWatch).char.islandsInBbox(i).char))
-                continue
-            end
+                if(isstruct(data_out(indexToWatch).char.islandsInBbox(i).char))
+                    continue
+                end
 
-            updateAxes(data_out(indexToWatch).char.islandsInBbox(i).char, handles, t);
-            t = t + 1;
-            if(t > 15)
-                break
+                updateAxes(data_out(indexToWatch).char.islandsInBbox(i).char, handles, t);
+                t = t + 1;
+                if(t > 15)
+                    break
+                end
             end
         end
     end
+    
     valid_characters = [];
+    strings = {};
     
     if ~isempty(data_out)
         for data_index = 1:length(data_out)
@@ -59,18 +59,18 @@ function [ imageData ] = processImage( imageData, handles )
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
                     continue
                 end
-                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, handles.templateData);
+                letter = extractLetter(data_out(data_index).char.islandsInBbox(i).char, templateData);
                 collectedChars = [collectedChars, letter];
             end
             if (length(collectedChars) >= 5)
                 valid_characters = strcat(valid_characters, [' | ', collectedChars]);
-                %valid_characters = [valid_characters ; collectedChars];
+                strings{end+1} = collectedChars;
             end
         end
     end
     handles.text6.String = valid_characters;
     
-    if(handles.doDump)
+    if(doDump)
         for data_index = 1:length(data_out)
             for i = 1:length(data_out(data_index).char.islandsInBbox)
                 if(isstruct(data_out(data_index).char.islandsInBbox(i).char))
